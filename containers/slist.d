@@ -230,6 +230,21 @@ template slist(T)
 			return Iter(head);
 		}
 
+		/// get index of value, type should override '==' (opEquals)
+		int index(T value)
+		{
+			Item* ptr = head;
+			int index = 0;
+			while(ptr)
+			{
+				if(ptr._value == value)
+					return index;
+				ptr = ptr._next;
+				index++;
+			}
+			return -1;
+		}
+
 		// operator overloading
 
 		/// same as `get`
