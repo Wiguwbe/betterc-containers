@@ -61,6 +61,28 @@ template slist(T)
 		size_t _size = 0;
 
 	public:
+		this(T* array, ulong array_len)
+		{
+			foreach(ulong i; 0 .. array_len)
+				append(array[i]);
+		}
+
+		this(T[] array)
+		{
+			this(array.ptr, array.length);
+		}
+
+		this(T** array, ulong array_len)
+		{
+			foreach(ulong i; 0 .. array_len)
+				append(*array[i]);
+		}
+
+		this(T*[] array)
+		{
+			this(array.ptr, array.length);
+		}
+	
 		~this()
 		{
 			Item *ptr;
@@ -354,4 +376,20 @@ unittest
 	assert(ptr.name == "Echo");
 	assert(ptr.age == 2);
 	assert(list[0] == ptr);
+}
+
+
+
+unittest
+{
+	struct Data
+	{
+		int a;
+	}
+	alias DataList = slist!Data;
+	DataList.List list = DataList.List([Data(1), Data(2), Data(3)]);
+	assert(list.size == 3);
+	assert(list[0].a == 1);
+	assert(list[1].a == 2);
+	assert(list[2].a == 3);
 }

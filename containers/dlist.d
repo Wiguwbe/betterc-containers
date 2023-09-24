@@ -70,6 +70,28 @@ template dlist(T)
 		size_t _size = 0;
 
 	public:
+		this(T* array, ulong array_len)
+		{
+			foreach(ulong i; 0 .. array_len)
+				append(array[i]);
+		}
+
+		this(T[] array)
+		{
+			this(array.ptr, array.length);
+		}
+
+		this(T** array, ulong array_len)
+		{
+			foreach(ulong i; 0 .. array_len)
+				append(*array[i]);
+		}
+
+		this(T*[] array)
+		{
+			this(array.ptr, array.length);
+		}
+
 		~this()
 		{
 			Item *ptr;
@@ -276,6 +298,84 @@ template dlist(T)
 			return -1;
 		}
 
+		List slice(int first, int last)
+		{
+			return slice(first, last, 1);
+		}
+
+		List slice(int first, int last, int step)
+		{
+			// FIXME this is a naive implementation
+			List l = List();
+			if(step == 0)
+				return l;
+			int index = 0;
+			Item* ptr;
+			if(first >= 0)
+			{
+				if(first >= _size)
+					return l;
+				ptr = _head;
+				while(first--)
+				{
+					ptr = ptr._next;
+					index ++;
+				}
+			}
+			else
+			{
+				if((-index) > _size)
+					return l;
+				ptr = _tail;
+				index = cast(int)_size-1;
+				while(++first)
+				{
+					ptr = ptr._prev;
+					index --;
+				}
+			}
+
+			if(last < 0)
+			{
+				last = cast(int)_size + last;
+			}
+
+			// start
+			while(index < _size && index >= 0)
+			{
+				l.append(ptr._value);
+				int s = step;
+				if(s > 0)
+				{
+					while(s--&&index<_size)
+					{
+						index++;
+						ptr = ptr._next;
+						if(index > last)
+						{
+							index = -1;
+							break;
+						}
+					}
+				}
+				else
+				{
+					while(s++&& index >= 0)
+					{
+						index--;
+						ptr = ptr._prev;
+						if(index < last)
+						{
+							index = -1;
+							break;
+						}
+					}
+				}
+			}
+
+			return l;
+		}
+
 		// operators and properties
 
 		/// same as `get`
@@ -421,4 +521,35 @@ unittest
 	list.del(-2);
 	list.del(0);
 	assert(list.size == 0);
+}
+
+unittest
+{
+	struct Data
+	{
+		int a;
+	}
+	alias DataList = dlist!Data;
+	DataList.List list = DataList.List([Data(1), Data(2), Data(3)]);
+	assert(list.size == 3);
+	assert(list[0].a == 1);
+	assert(list[1].a == 2);
+	assert(list[2].a == 3);
+}
+
+unittest
+{
+	// test slice
+	struct Int
+	{
+		int i;
+	}
+
+	alias IntList = dlist!Int;
+	IntList.List list = IntList.List([Int(0), Int(1), Int(2), Int(3), Int(4)]);
+	IntList.List even = list.slice(0, cast(int)list.size, 2);
+	assert(even.size == 3);
+	assert(even[0].i == 0);
+	assert(even[1].i == 2);
+	assert(even[2].i == 4);
 }
