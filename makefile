@@ -1,6 +1,6 @@
 DMD := dmd
 
-CONTAINERS := dlist slist
+CONTAINERS := dlist slist tstree
 
 SOURCES := $(patsubst %,containers/%.d,$(CONTAINERS))
 BINS := $(patsubst %,bin/%,$(CONTAINERS))
@@ -25,7 +25,7 @@ bin/dlist: containers/dlist.d
 bin/slist: containers/slist.d
 
 bin/%: containers/%.d
-	$(DMD) -unittest -cov -main $< -od=bin/ -of=$@
+	$(DMD) -g -unittest -cov -main $< -od=bin/ -of=$@
 
 clean:
 	rm -rf bin cov docs
